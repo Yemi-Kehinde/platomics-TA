@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  namespace: project-plato
+  name: np-backend
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: db
+            type: db1
+      ports:
+        - protocol: TCP
+          port: 6379
+    - from:
+      - podSelector:
+          matchLabels:
+            app: db
+            type: db2
+      ports:
+        - protocol: TCP
+          port: 5432

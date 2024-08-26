@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: project-plato
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: busybox
+          image: busybox:1.32.0
+          command: ['sh', '-c', 'tail -f /dev/null']
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: tmp-storage
+              mountPath: /tmp
+          livenessProbe:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - "true"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - "nc -zv db1 6379 || exit 1"
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 10
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: tmp-storage
+          emptyDir: {}
