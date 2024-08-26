@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: project-plato
+  name: db1
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+      type: db1
+  template:
+    metadata:
+      labels:
+        app: db
+        type: db1
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.16.1-alpine
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-db1-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: project-plato
+  name: db2
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+      type: db2
+  template:
+    metadata:
+      labels:
+        app: db
+        type: db2
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.16.1-alpine
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db2-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db2-secret
+                  key: password
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-db2-config
