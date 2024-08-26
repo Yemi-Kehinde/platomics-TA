@@ -51,6 +51,18 @@
     service/db1 created
     service/db2 created
 
+   I created custom nginx.conf files for both db1 and db2 to ensure that each service listens on the required ports (6379 for db1 and 5432 for db2). These configurations are managed via ConfigMaps in Kubernetes.
+   Referenece: "nginx-db1.conf and nginx-db2.conf"
+
+   - Create ConfigMap for db1 & db2:
+     kubectl create configmap nginx-db1-config --from-file=nginx-db1.conf -n project-plato
+     kubectl create configmap nginx-db2-config --from-file=nginx-db2.conf -n project-plato
+   
+   These ConfigMaps store the nginx.conf files and make them available to the db1 and db2 deployments.
+
+   # Verify the ConfigMap Mount:
+     For db1: kubectl exec -it db1-84bbbcc84d-db2jp  -n project-plato -- cat /etc/nginx/nginx.conf
+     For db2: kubectl exec -it db2-6ff65497b4-khg5b -n project-plato -- cat /etc/nginx/nginx.conf
    # Ensure that db1 is exposed on port 6379 and db2 on port 5432
   - Verify the services:    
     kubectl get services -n project-plato
